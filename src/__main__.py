@@ -8,7 +8,7 @@ NAME = 'dotman'
 # Create top level parser and add a subparser
 parser = argparse.ArgumentParser(prog=NAME,
         description="{} manages and filters your dotfiles.".format(NAME))
-subparsers = parser.add_subparsers(help='action to take')
+subparsers = parser.add_subparsers(help='action to take', dest='action')
 
 # Parser for add action
 add_parser = subparsers.add_parser('add',
@@ -27,5 +27,6 @@ update_parser.set_defaults(func=actions.update)
 
 # Parse arguments
 args = parser.parse_args()
-print(args)
+if not args.action:
+    parser.error(message='Missing action')
 args.func(args)
