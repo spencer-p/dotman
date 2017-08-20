@@ -54,6 +54,13 @@ def initialize(custom_config_file = None):
             # Write to file
             with config_file.open('w') as f:
                 config.write(f)
+
+        # Make sure the directories exist
+        # TODO this is not pythonic
+        if not (config_dir / 'etc').exists():
+            (config_dir / 'etc').mkdir()
+        if not (config_dir / 'filters').exists():
+            (config_dir / 'filters').mkdir()
     
     return config
 
