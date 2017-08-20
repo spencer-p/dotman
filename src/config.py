@@ -1,4 +1,4 @@
-import os
+from pathlib import Path
 import configparser
 
 # Name of program
@@ -15,23 +15,22 @@ def initialize(custom_config_file = None):
 
     # Use custom config file if passed
     if custom_config_file:
-        config_file = custom_config_file
-        config_dir = os.path.abspath(os.path.dirname(custom_config_file))
+        config_file = Path(custom_config_file)
+        config_dir = config_file.parent.resolve()
 
-    # Otherwise use default
+    # Otherwise detect default default
     else:
-        # Detect configuration directory first
-        config_dir = os.path.join(os.environ['HOME'], '.config', NAME)
+        config_dir = Path.home() / '.config' / NAME
 
         # Use xdg error if we have it
         try:
             from xdg.BaseDirectory import xdg_config_home
-            config_dir = os.path.join(xdg_config_home, NAME)
+            config_dir = Path(xdg_config_home, NAME)
         except:
             # TODO log this? print an error?
             pass
 
-        config_file = os.path.join(config_dir, 'config')
+        config_file = config_dir / 'config'
 
     # Load or create a config object if not done already
     if not config:
@@ -39,21 +38,21 @@ def initialize(custom_config_file = None):
         config = configparser.ConfigParser()
 
         # Try reading in the configuration
-        if os.path.exists(config_file):
+        if config_file.exists():
             config.read(config_file)
 
         # Otherwise write a new one
         else:
             # Write defaults
-            config[NAME] = {'dot_dir': os.path.join(config_dir, 'etc'),
-                    'filter_dir': os.path.join(config_dir, 'filters')}
+            config[NAME] = {'dot_dir': config_dir / 'etc',
+                    'filter_dir': config_dir / 'filters'}
 
             # Create directory if needed
-            if not os.path.exists(config_dir):
-                os.mkdir(config_dir)
+            if not config_dir.exists():
+                config_dir.mkdir(parents=True)
 
             # Write to file
-            with open(config_file, 'w') as f:
+            with config_file.open('w') as f:
                 config.write(f)
     
     return config
